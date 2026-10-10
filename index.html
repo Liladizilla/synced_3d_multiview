@@ -88,6 +88,9 @@
       <div class="deck-divider"></div>
       <label class="speed-control" for="speed"><span class="speed-label">ROTATION SPEED <output id="speed-value" for="speed">1.0×</output></span><input id="speed" type="range" min="0" max="3" value="1" step="0.1"><span class="range-ends"><span>STILL</span><span>HYPER</span></span></label>
       <div class="deck-divider deck-divider-small"></div>
+      <label class="shape-control" for="shape-mode"><span class="speed-label">SCULPTURE</span><select id="shape-mode" aria-label="Choose sculpture"><option value="polyhedron">Polyhedral core</option><option value="torus">Torus knot</option><option value="crystal">Crystal cluster</option><option value="helix">Helix array</option></select></label>
+      <div class="deck-divider deck-divider-small"></div>
+      <div class="scene-toggles"><button id="toggle-wireframe" class="button button-secondary" type="button" aria-pressed="false">Wireframe</button><button id="toggle-grid" class="button button-secondary" type="button" aria-pressed="true">Grid on</button></div>
       <div class="action-group">
         <button id="toggle-motion" class="button button-primary" type="button" aria-pressed="false"><span class="button-icon">Ⅱ</span><span>Pause motion</span></button>
         <button id="reset-scene" class="button button-secondary" type="button"><span class="button-icon">↺</span><span>Reset scene</span></button>

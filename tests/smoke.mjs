@@ -33,6 +33,13 @@ try {
   if (!(await page.getByRole("button", { name: "Resume motion" }).isVisible())) throw new Error("Pause control failed");
   await page.getByRole("button", { name: "Resume motion" }).click();
   await page.getByRole("button", { name: "Reset scene" }).click();
+  await page.locator("#shape-mode").selectOption("crystal");
+  if (!(await page.locator("#scene-state").innerText()).includes("Crystal cluster")) throw new Error("Sculpture selector failed");
+  await page.getByRole("button", { name: "Wireframe" }).click();
+  if (!(await page.getByRole("button", { name: "Wireframe on" }).isVisible())) throw new Error("Wireframe toggle failed");
+  await page.getByRole("button", { name: "Grid on" }).click();
+  if (!(await page.getByRole("button", { name: "Grid off" }).isVisible())) throw new Error("Grid toggle failed");
+  await page.getByRole("button", { name: "Reset scene" }).click();
   await page.locator("#speed").evaluate(el => {
     el.value = "2";
     el.dispatchEvent(new Event("input", { bubbles: true }));
