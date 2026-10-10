@@ -33,7 +33,10 @@ try {
   if (!(await page.getByRole("button", { name: "Resume motion" }).isVisible())) throw new Error("Pause control failed");
   await page.getByRole("button", { name: "Resume motion" }).click();
   await page.getByRole("button", { name: "Reset scene" }).click();
-  await page.locator("#speed").fill("2");
+  await page.locator("#speed").evaluate(el => {
+    el.value = "2";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
   if (!(await page.locator("#speed-value").innerText()).includes("2.0")) throw new Error("Speed control failed");
   if (errors.length) throw new Error("Browser errors: " + errors.join("; "));
   console.log("PASS: page loads, three canvases render, controls work, and no uncaught browser errors occurred.");
