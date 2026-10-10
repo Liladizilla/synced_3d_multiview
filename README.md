@@ -1,51 +1,46 @@
 # Synced 3D Multiview
 
-An interactive 3D visual demo using [Three.js](https://threejs.org), complete with synchronized animations and immersive background music — built as a creative developer portfolio experience.
+A small, responsive Three.js playground that renders one animated object from three synchronized camera perspectives.
 
 ## Features
 
-- *Animated 3D Cube* using Three.js
-- *Synced Views*: Multiple camera perspectives
-- *Background Music*: Plays automatically to set the vibe
-- *Clean Visuals*: Custom lighting and camera controls
-- *Modular Setup*: Easily replace or enhance parts
+- Three simultaneous camera views: orbit, front, and overhead
+- Shared object rotation, so all views stay synchronized
+- Motion pause/resume, speed control, and reset
+- Responsive layout for desktop and mobile
+- Lightweight static site; Three.js is loaded from jsDelivr
+- Automated JavaScript checks and headless-browser smoke tests
+- CI runs on pushes, pull requests, manual dispatch, and a daily schedule
 
-## Preview
+## Run locally
 
-(Include a GIF or screenshot of the cube and scene here)
-
-## Getting Started
-
-### 1. Clone the repository
+Python is enough to serve the static files:
 
 ```bash
-git clone https://github.com/Liladizilla/synced_3d_multiview.git
-cd synced_3d_multiview
-
-### 2. Install a simple web server
-Use python to serve the project:
-
-#python
 python3 -m http.server 8000
+```
 
-visit http://localhost:8000
+Open http://localhost:8000. The browser needs internet access to load Three.js from the CDN.
 
-### 3. Customize
+## Test locally
 
-Replace Music: Swap out bg.mp3 for your own background music.
+```bash
+npm install
+npm run check
+npx playwright install chromium
+npm test
+```
 
-Add Models or Views: Expand main.js with additional geometry or controls.
+## Automation
 
+The GitHub Actions workflow in `.github/workflows/ci.yml` checks JavaScript syntax and opens the app in headless Chromium to verify all three views render and the controls work. It runs on every push and pull request, can be started manually, and runs daily at 07:23 UTC.
 
-File Structure
+Scheduled GitHub Actions can be delayed during busy periods. Keep the daily job as a health check, not a strict uptime guarantee.
 
-synced_3d_multiview/
-├── index.html
-├── style.css
-├── main.js
-├── three.module.js
-├── bg.mp3
+## Project structure
 
-Author
-
-Lil Adizilla — @Liladizilla on GitHub
+- `index.html` — page structure and Three.js CDN
+- `style.css` — responsive dark UI
+- `main.js` — scene, cameras, shared animation, and controls
+- `tests/smoke.mjs` — browser smoke test
+- `.github/workflows/ci.yml` — continuous integration and daily health check
