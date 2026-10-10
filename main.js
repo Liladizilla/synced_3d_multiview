@@ -107,7 +107,7 @@
   }
 
   function buildSculpture(object, mode) {
-    object.clear();
+    disposeSculpture(object);
     const wires = [];
     const rings = [];
     const satellites = [];
@@ -273,8 +273,10 @@
     }
     for (const view of renderers) {
       view.object.rotation.set(state.rotationX, state.rotationY, state.rotationZ);
-      view.object.userData.rings?.forEach(ring => { ring.rotation.z += 0.0018 * state.speed * (ring.userData.spin || 1) * delta; });
-      view.object.userData.satellites?.forEach((part, i) => { if (part.userData.satellite) { const t = time * 0.00035 * (i % 2 ? -1 : 1) + i; part.rotation.x += 0.0015 * delta; part.rotation.y += 0.002 * delta; } });
+      if (state.running) {
+        view.object.userData.rings?.forEach(ring => { ring.rotation.z += 0.0018 * state.speed * (ring.userData.spin || 1) * delta; });
+        view.object.userData.satellites?.forEach((part, i) => { if (part.userData.satellite) { part.rotation.x += 0.0015 * delta; part.rotation.y += 0.002 * delta; } });
+      }
       view.stars.rotation.y = state.rotationY * 0.04;
       view.renderer.render(view.scene, view.camera);
     }
