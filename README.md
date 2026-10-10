@@ -2,7 +2,9 @@
 
 An interactive Three.js sculpture studio with four procedural 3D forms, synchronized camera perspectives, and hands-on geometry controls.
 
-![Synced 3D Studio preview](docs/screenshots/studio.png)
+![Synced 3D Studio screenshot, captured from the live preview with the Crystal cluster preset selected](https://cdn.browser-use.com/screenshots/b53c2632-71a5-42ac-9634-beaa7f7b1e62/6.png)
+
+_Screenshot captured from the rendered Vercel preview after selecting Crystal cluster. The browser check confirmed four presets, three camera canvases, and no runtime errors._
 
 **Live demo:** https://synced-3d-multiview.vercel.app/
 
