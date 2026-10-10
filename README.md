@@ -67,4 +67,4 @@ Scheduled GitHub Actions can be delayed during busy periods. Treat the daily job
 - `main.js` — procedural sculptures, synchronized cameras, animation, and interaction
 - `tests/smoke.mjs` — browser smoke tests
 - `.github/workflows/ci.yml` — continuous integration and scheduled check
-- `docs/screenshots/studio.png` — captured preview of the deployed studio
+- README screenshot — captured browser image of the rendered studio preview
