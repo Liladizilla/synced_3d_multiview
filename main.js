@@ -275,7 +275,7 @@
       view.object.rotation.set(state.rotationX, state.rotationY, state.rotationZ);
       if (state.running) {
         view.object.userData.rings?.forEach(ring => { ring.rotation.z += 0.0018 * state.speed * (ring.userData.spin || 1) * delta; });
-        view.object.userData.satellites?.forEach((part, i) => { if (part.userData.satellite) { part.rotation.x += 0.0015 * delta; part.rotation.y += 0.002 * delta; } });
+        view.object.userData.satellites?.forEach((part, i) => { if (part.userData.satellite) { part.rotation.x += 0.0015 * state.speed * delta; part.rotation.y += 0.002 * state.speed * delta; } });
       }
       view.stars.rotation.y = state.rotationY * 0.04;
       view.renderer.render(view.scene, view.camera);
@@ -319,12 +319,16 @@
         gridButton.textContent = state.showGrid ? "Grid on" : "Grid off";
       });
       window.addEventListener("keydown", event => {
-        if (event.code === "Space" && !/INPUT|TEXTAREA|BUTTON/.test(document.activeElement?.tagName || "")) {
+        const active = document.activeElement;
+        const tag = active?.tagName || "";
+        const isEditable = active?.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(tag);
+        const isInteractive = isEditable || tag === "BUTTON" || tag === "A";
+        if (event.code === "Space" && !isInteractive) {
           event.preventDefault();
           state.running = !state.running;
           updateMotionButton();
         }
-        if (event.key.toLowerCase() === "r" && !/INPUT|TEXTAREA/.test(document.activeElement?.tagName || "")) resetScene();
+        if (event.key.toLowerCase() === "r" && !isInteractive) resetScene();
       });
       resizeObserver = new ResizeObserver(() => renderers.forEach(view => view.resize()));
       renderers.forEach(view => resizeObserver.observe(view.container));
