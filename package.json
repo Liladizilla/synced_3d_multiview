@@ -1,8 +1,8 @@
 {
   "name": "synced-3d-multiview",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "A synchronized Three.js multiview playground.",
+  "description": "An interactive Three.js sculpture studio with four procedural forms, synchronized camera views, and live scene controls.",
   "scripts": {
     "check": "node --check main.js && node --check windowManager.js",
     "test": "node tests/smoke.mjs"
