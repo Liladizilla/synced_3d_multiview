@@ -33,13 +33,56 @@ try {
   if (!(await page.getByRole("button", { name: "Resume motion" }).isVisible())) throw new Error("Pause control failed");
   await page.getByRole("button", { name: "Resume motion" }).click();
   await page.getByRole("button", { name: "Reset scene" }).click();
-  await page.locator("#shape-mode").selectOption("crystal");
-  if (!(await page.locator("#scene-state").innerText()).includes("Crystal cluster")) throw new Error("Sculpture selector failed");
+  const shapeOptions = await page.locator("#shape-mode option").evaluateAll(options => options.map(option => option.value));
+  for (const [value, label] of [["polyhedron", "Polyhedral core"], ["torus", "Torus knot"], ["crystal", "Crystal cluster"], ["helix", "Helix array"]]) {
+    if (!shapeOptions.includes(value)) throw new Error("Missing sculpture preset: " + value);
+    await page.locator("#shape-mode").selectOption(value);
+    if (!(await page.locator("#scene-state").innerText()).includes(label)) throw new Error("Sculpture selector failed for " + label);
+    const mode = await page.evaluate(() => window.synced3D.renderers.map(view => view.object.userData.mode));
+    if (mode.some(current => current !== value)) throw new Error("Sculpture preset did not synchronize across cameras: " + value);
+  }
   await page.getByRole("button", { name: "Wireframe" }).click();
-  if (!(await page.getByRole("button", { name: "Wireframe on" }).isVisible())) throw new Error("Wireframe toggle failed");
+  const wireframeVisible = await page.evaluate(() => window.synced3D.renderers.map(view => view.object.userData.wires.length > 0 && view.object.userData.wires.every(wire => wire.visible)));
+  if (wireframeVisible.some(visible => !visible)) throw new Error("Wireframe overlays did not become visible in every camera");
+  if (!(await page.getByRole("button", { name: "Wireframe on" }).isVisible())) throw new Error("Wireframe button state failed");
   await page.getByRole("button", { name: "Grid on" }).click();
-  if (!(await page.getByRole("button", { name: "Grid off" }).isVisible())) throw new Error("Grid toggle failed");
+  const gridHidden = await page.evaluate(() => window.synced3D.renderers.every(view => !view.floor.visible));
+  if (!gridHidden) throw new Error("Grid remained visible in one or more cameras");
+  if (!(await page.getByRole("button", { name: "Grid off" }).isVisible())) throw new Error("Grid button state failed");
+
+  await page.locator("#speed").evaluate(el => {
+    el.value = "0";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  const satelliteBefore = await page.evaluate(() => {
+    const satellite = window.synced3D.renderers[0].object.userData.satellites[0];
+    return [satellite.rotation.x, satellite.rotation.y];
+  });
+  await page.waitForTimeout(350);
+  const satelliteAfter = await page.evaluate(() => {
+    const satellite = window.synced3D.renderers[0].object.userData.satellites[0];
+    return [satellite.rotation.x, satellite.rotation.y];
+  });
+  if (satelliteBefore.some((value, i) => Math.abs(value - satelliteAfter[i]) > 0.00001)) throw new Error("Satellites moved at zero speed");
+
+  await page.locator("#shape-mode").focus();
+  await page.keyboard.press("Space");
+  if (!(await page.getByRole("button", { name: "Pause motion" }).isVisible())) throw new Error("Space on the focused dropdown unexpectedly paused motion");
+  await page.keyboard.press("R");
+  if ((await page.locator("#shape-mode").inputValue()) !== "helix") throw new Error("R on the focused dropdown unexpectedly reset the scene");
+
   await page.getByRole("button", { name: "Reset scene" }).click();
+  const resetState = await page.evaluate(() => ({
+    mode: window.synced3D.state.shapeMode,
+    speed: window.synced3D.state.speed,
+    wireframe: window.synced3D.state.wireframe,
+    showGrid: window.synced3D.state.showGrid,
+    floors: window.synced3D.renderers.every(view => view.floor.visible),
+    wires: window.synced3D.renderers.every(view => view.object.userData.wires.every(wire => !wire.visible))
+  }));
+  if (resetState.mode !== "polyhedron" || resetState.speed !== 1 || resetState.wireframe || !resetState.showGrid || !resetState.floors || !resetState.wires) {
+    throw new Error("Reset did not restore default scene state: " + JSON.stringify(resetState));
+  }
   await page.locator("#speed").evaluate(el => {
     el.value = "2";
     el.dispatchEvent(new Event("input", { bubbles: true }));
