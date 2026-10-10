@@ -1,13 +1,40 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Multi-Window 3D Scene</title>
-  <style>body { margin: 0; overflow: hidden; }</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b12">
+  <meta name="description" content="A synchronized Three.js multiview playground with three live camera perspectives.">
+  <title>Synced 3D Multiview</title>
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script defer src="./main.js"></script>
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.min.js"></script>
-  <script src="WindowManager.js"></script>
-  <script src="main.js"></script>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Synced 3D Multiview home"><span class="brand-mark">◈</span><span>SYNCED<span class="brand-light"> / 3D</span></span></a>
+      <div class="live-indicator"><span class="pulse"></span><span id="status">INITIALIZING SCENE</span></div>
+    </header>
+    <section class="intro">
+      <p class="eyebrow">REAL-TIME CAMERA SYNCHRONIZATION</p>
+      <h1>One scene.<br><span>Three perspectives.</span></h1>
+      <p class="intro-copy">A small 3D playground for watching one object from synchronized camera angles. No setup, no account, just geometry doing its thing.</p>
+    </section>
+    <section class="view-grid" aria-label="Synchronized 3D camera views">
+      <article class="view-card featured"><div class="view-heading"><span><i>01</i> ORBIT VIEW</span><span class="view-tag">LIVE</span></div><div class="viewport" id="view-orbit" aria-label="Orbit camera view"></div><div class="view-footer"><span>FREE ROTATION</span><span>CAM 01</span></div></article>
+      <article class="view-card"><div class="view-heading"><span><i>02</i> FRONT VIEW</span><span class="view-tag">LIVE</span></div><div class="viewport" id="view-front" aria-label="Front camera view"></div><div class="view-footer"><span>STRAIGHT ON</span><span>CAM 02</span></div></article>
+      <article class="view-card"><div class="view-heading"><span><i>03</i> TOP VIEW</span><span class="view-tag">LIVE</span></div><div class="viewport" id="view-top" aria-label="Top camera view"></div><div class="view-footer"><span>OVERHEAD</span><span>CAM 03</span></div></article>
+    </section>
+    <section class="control-panel" aria-label="Scene controls">
+      <div class="control-copy"><span class="eyebrow">SCENE CONTROLS</span><strong>Adjust the motion</strong><span class="control-hint">Changes apply to all three views.</span></div>
+      <div class="control-actions">
+        <label class="speed-control" for="speed"><span>SPEED <output id="speed-value" for="speed">1.0×</output></span><input id="speed" type="range" min="0" max="3" value="1" step="0.1"></label>
+        <button id="toggle-motion" class="button button-primary" type="button">Pause motion</button>
+        <button id="reset-scene" class="button" type="button">Reset scene</button>
+      </div>
+    </section>
+    <footer class="footer"><span>THREE.JS · SYNCHRONIZED MULTIVIEW</span><span id="frame-status">WAITING FOR RENDERER</span></footer>
+  </main>
 </body>
 </html>

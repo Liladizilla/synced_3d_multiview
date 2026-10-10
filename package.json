@@ -1,0 +1,13 @@
+{
+  "name": "synced-3d-multiview",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A synchronized Three.js multiview playground.",
+  "scripts": {
+    "check": "node --check main.js && node --check windowManager.js",
+    "test": "node tests/smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}
