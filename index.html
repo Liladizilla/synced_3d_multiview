@@ -3,38 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080b12">
-  <meta name="description" content="A synchronized Three.js multiview playground with three live camera perspectives.">
-  <title>Synced 3D Multiview</title>
+  <meta name="theme-color" content="#080a10">
+  <meta name="description" content="Explore a living 3D object through three synchronized camera perspectives in an immersive real-time studio.">
+  <title>Synced 3D — Studio</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="./style.css">
   <script defer src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
   <script defer src="./main.js"></script>
 </head>
 <body>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
   <main class="app-shell">
     <header class="topbar">
-      <a class="brand" href="./" aria-label="Synced 3D Multiview home"><span class="brand-mark">◈</span><span>SYNCED<span class="brand-light"> / 3D</span></span></a>
-      <div class="live-indicator"><span class="pulse"></span><span id="status">INITIALIZING SCENE</span></div>
+      <a class="brand" href="./" aria-label="Synced 3D Studio home">
+        <span class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="brand-name">synced<span>3d</span></span>
+        <span class="brand-divider"></span>
+        <span class="brand-product">STUDIO</span>
+      </a>
+      <div class="topbar-right">
+        <span class="session-label"><span class="status-dot"></span><span id="status">CONNECTING TO SCENE</span></span>
+        <span class="version-pill">BETA <span>01</span></span>
+      </div>
     </header>
-    <section class="intro">
-      <p class="eyebrow">REAL-TIME CAMERA SYNCHRONIZATION</p>
-      <h1>One scene.<br><span>Three perspectives.</span></h1>
-      <p class="intro-copy">A small 3D playground for watching one object from synchronized camera angles. No setup, no account, just geometry doing its thing.</p>
-    </section>
-    <section class="view-grid" aria-label="Synchronized 3D camera views">
-      <article class="view-card featured"><div class="view-heading"><span><i>01</i> ORBIT VIEW</span><span class="view-tag">LIVE</span></div><div class="viewport" id="view-orbit" aria-label="Orbit camera view"></div><div class="view-footer"><span>FREE ROTATION</span><span>CAM 01</span></div></article>
-      <article class="view-card"><div class="view-heading"><span><i>02</i> FRONT VIEW</span><span class="view-tag">LIVE</span></div><div class="viewport" id="view-front" aria-label="Front camera view"></div><div class="view-footer"><span>STRAIGHT ON</span><span>CAM 02</span></div></article>
-      <article class="view-card"><div class="view-heading"><span><i>03</i> TOP VIEW</span><span class="view-tag">LIVE</span></div><div class="viewport" id="view-top" aria-label="Top camera view"></div><div class="view-footer"><span>OVERHEAD</span><span>CAM 03</span></div></article>
-    </section>
-    <section class="control-panel" aria-label="Scene controls">
-      <div class="control-copy"><span class="eyebrow">SCENE CONTROLS</span><strong>Adjust the motion</strong><span class="control-hint">Changes apply to all three views.</span></div>
-      <div class="control-actions">
-        <label class="speed-control" for="speed"><span>SPEED <output id="speed-value" for="speed">1.0×</output></span><input id="speed" type="range" min="0" max="3" value="1" step="0.1"></label>
-        <button id="toggle-motion" class="button button-primary" type="button">Pause motion</button>
-        <button id="reset-scene" class="button" type="button">Reset scene</button>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span> A LIVE MULTI-CAMERA PLAYGROUND</div>
+        <h1>See the shape<br>of <span>motion.</span></h1>
+        <p>One living object. Three synchronized perspectives. Move through the scene, study its geometry, and let your curiosity drive.</p>
+        <div class="hero-meta"><span class="meta-icon">✳</span> REAL-TIME RENDERING <span class="meta-separator">/</span> NO SETUP REQUIRED</div>
+      </div>
+      <div class="hero-orbit-art" aria-hidden="true">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div>
+        <span class="orbit-core"></span><span class="orbit-node node-one"></span><span class="orbit-node node-two"></span>
+        <span class="art-coordinate coordinate-one">X <b>+0.84</b></span><span class="art-coordinate coordinate-two">Z <b>−1.20</b></span>
       </div>
     </section>
-    <footer class="footer"><span>THREE.JS · SYNCHRONIZED MULTIVIEW</span><span id="frame-status">WAITING FOR RENDERER</span></footer>
+
+    <section class="studio-heading" aria-label="Studio overview">
+      <div><span class="section-index">01</span><div><h2>The observation deck</h2><p>Every angle shares the same moment in space.</p></div></div>
+      <div class="scene-readout"><span class="readout-label">SCENE STATUS</span><span class="readout-value"><i></i><span id="scene-state">Warming up</span></span></div>
+    </section>
+
+    <section class="view-grid" aria-label="Synchronized 3D camera views">
+      <article class="view-card view-primary" id="card-orbit">
+        <div class="view-heading">
+          <div class="camera-title"><span class="camera-number">01</span><div><h3>Orbit</h3><p>Free perspective</p></div></div>
+          <span class="live-tag"><i></i> LIVE</span>
+        </div>
+        <div class="viewport viewport-primary" id="view-orbit" aria-label="Interactive orbit camera view. Drag to rotate the camera.">
+          <div class="viewport-overlay overlay-top"><span>CAM_01</span><span class="axis-mark">XYZ <i></i></span></div>
+          <div class="viewport-overlay overlay-bottom"><span>DRAG TO EXPLORE</span><span class="crosshair">＋</span></div>
+        </div>
+        <div class="view-footer"><span><i class="footer-dot"></i> PERSPECTIVE CAMERA</span><span>45° FOV</span></div>
+      </article>
+      <div class="secondary-views">
+        <article class="view-card" id="card-front">
+          <div class="view-heading">
+            <div class="camera-title"><span class="camera-number">02</span><div><h3>Front</h3><p>Orthogonal study</p></div></div>
+            <span class="mini-live">SYNCED</span>
+          </div>
+          <div class="viewport" id="view-front" aria-label="Front camera view">
+            <div class="viewport-overlay overlay-top"><span>CAM_02</span><span>Y / Z</span></div>
+          </div>
+          <div class="view-footer"><span><i class="footer-dot"></i> FRONTAL CAMERA</span><span>42° FOV</span></div>
+        </article>
+        <article class="view-card" id="card-top">
+          <div class="view-heading">
+            <div class="camera-title"><span class="camera-number">03</span><div><h3>Top</h3><p>Plan view</p></div></div>
+            <span class="mini-live">SYNCED</span>
+          </div>
+          <div class="viewport" id="view-top" aria-label="Top camera view">
+            <div class="viewport-overlay overlay-top"><span>CAM_03</span><span>X / Z</span></div>
+          </div>
+          <div class="view-footer"><span><i class="footer-dot"></i> OVERHEAD CAMERA</span><span>42° FOV</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="control-deck" aria-label="Scene controls">
+      <div class="deck-intro"><span class="deck-icon" aria-hidden="true">◌</span><div><span class="deck-kicker">CONTROL DECK</span><h2>Shape the experience</h2></div></div>
+      <div class="deck-divider"></div>
+      <label class="speed-control" for="speed"><span class="speed-label">ROTATION SPEED <output id="speed-value" for="speed">1.0×</output></span><input id="speed" type="range" min="0" max="3" value="1" step="0.1"><span class="range-ends"><span>STILL</span><span>HYPER</span></span></label>
+      <div class="deck-divider deck-divider-small"></div>
+      <div class="action-group">
+        <button id="toggle-motion" class="button button-primary" type="button" aria-pressed="false"><span class="button-icon">Ⅱ</span><span>Pause motion</span></button>
+        <button id="reset-scene" class="button button-secondary" type="button"><span class="button-icon">↺</span><span>Reset scene</span></button>
+      </div>
+      <div class="keyboard-hint"><span>SHORTCUTS</span><kbd>SPACE</kbd><kbd>R</kbd></div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-brand"><span class="footer-mark">S.</span><span>Made for curious minds.</span></div>
+      <div class="footer-stats"><span><i></i> <b id="camera-count">03</b> CAMERAS</span><span>FPS <b id="fps-value">--</b></span><span id="frame-status">INITIALIZING RENDERER</span></div>
+      <span class="footer-note">THREE.JS <b>·</b> WEBGL</span>
+    </footer>
   </main>
 </body>
 </html>
