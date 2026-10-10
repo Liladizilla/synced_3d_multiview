@@ -9,6 +9,9 @@
   const speedValue = byId("speed-value");
   const toggleButton = byId("toggle-motion");
   const resetButton = byId("reset-scene");
+  const shapeInput = byId("shape-mode");
+  const wireButton = byId("toggle-wireframe");
+  const gridButton = byId("toggle-grid");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const views = [
     { id: "view-orbit", name: "Orbit", position: [4.3, 2.65, 5.25], fov: 43, interactive: true },
@@ -18,7 +21,8 @@
   const state = {
     running: !reduceMotion, speed: 1, rotationX: 0, rotationY: 0, rotationZ: 0,
     lastFrame: 0, frames: 0, fpsFrames: 0, fpsStarted: 0, cameraYaw: 0,
-    cameraPitch: 0, dragging: false, pointerX: 0, pointerY: 0
+    cameraPitch: 0, dragging: false, pointerX: 0, pointerY: 0,
+    shapeMode: "polyhedron", wireframe: false, showGrid: true
   };
   const renderers = [];
   let animationId = 0;
@@ -81,40 +85,7 @@
     scene.add(blueLight);
 
     const object = new THREE.Group();
-    const geometry = new THREE.IcosahedronGeometry(1.12, 2);
-    const material = new THREE.MeshPhysicalMaterial({
-      color: 0x9cebd8, metalness: 0.58, roughness: 0.22, clearcoat: 1,
-      clearcoatRoughness: 0.16, flatShading: false
-    });
-    const core = new THREE.Mesh(geometry, material);
-    object.add(core);
-    const wire = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(1.145, 2),
-      new THREE.MeshBasicMaterial({ color: 0xb3c2ff, wireframe: true, transparent: true, opacity: 0.18 })
-    );
-    object.add(wire);
-
-    const halo = new THREE.Mesh(
-      new THREE.TorusGeometry(1.62, 0.006, 6, 120),
-      new THREE.MeshBasicMaterial({ color: 0x91f1d5, transparent: true, opacity: 0.48 })
-    );
-    halo.rotation.set(1.08, 0.18, 0.25);
-    object.add(halo);
-    const haloTwo = new THREE.Mesh(
-      new THREE.TorusGeometry(1.82, 0.0035, 5, 120),
-      new THREE.MeshBasicMaterial({ color: 0x8ca7ff, transparent: true, opacity: 0.38 })
-    );
-    haloTwo.rotation.set(0.24, 1.15, -0.35);
-    object.add(haloTwo);
-
-    const nodeGeometry = new THREE.SphereGeometry(0.045, 12, 12);
-    const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xb2ffe9 });
-    const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
-    node.position.set(1.55, 0.18, 0.35);
-    object.add(node);
-    const nodeTwo = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 10), new THREE.MeshBasicMaterial({ color: 0x9eafff }));
-    nodeTwo.position.set(-0.75, 1.25, -0.55);
-    object.add(nodeTwo);
+    const sculpture = buildSculpture(object, state.shapeMode);
     scene.add(object);
 
     const floor = new THREE.GridHelper(16, 32, 0x28494d, 0x1b2b3b);
@@ -130,9 +101,94 @@
       camera.updateProjectionMatrix();
     };
     resize();
-    const view = { ...config, container, scene, camera, renderer, object, core, wire, halo, haloTwo, stars, resize };
+    const view = { ...config, container, scene, camera, renderer, object, stars, floor, resize };
     if (config.interactive) attachOrbitControls(view);
     return view;
+  }
+
+  function buildSculpture(object, mode) {
+    object.clear();
+    const wires = [];
+    const rings = [];
+    const satellites = [];
+    const mint = new THREE.MeshPhysicalMaterial({ color: 0x9cebd8, metalness: 0.62, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.12 });
+    const blue = new THREE.MeshPhysicalMaterial({ color: 0x8299ff, metalness: 0.58, roughness: 0.24, clearcoat: 1 });
+    const silver = new THREE.MeshStandardMaterial({ color: 0xc3d5e8, metalness: 0.82, roughness: 0.28 });
+    const wireMat = new THREE.MeshBasicMaterial({ color: 0xb3c2ff, wireframe: true, transparent: true, opacity: 0.25 });
+    const addMesh = (geometry, material, position = [0,0,0], scale = 1, wire = false) => {
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(...position);
+      mesh.scale.setScalar(scale);
+      object.add(mesh);
+      if (wire) {
+        const overlay = new THREE.Mesh(geometry, wireMat.clone());
+        overlay.position.copy(mesh.position);
+        overlay.scale.setScalar(scale * 1.008);
+        overlay.visible = state.wireframe;
+        object.add(overlay);
+        wires.push(overlay);
+      }
+      return mesh;
+    };
+    const addRing = (radius, tube, color, rotation, speed = 1) => {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, tube, 8, 144), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.62 }));
+      ring.rotation.set(...rotation);
+      ring.userData.spin = speed;
+      object.add(ring);
+      rings.push(ring);
+      return ring;
+    };
+    if (mode === "polyhedron") {
+      addMesh(new THREE.DodecahedronGeometry(0.9, 0), mint, [0,0,0], 1, true);
+      addMesh(new THREE.IcosahedronGeometry(0.37, 1), blue, [0,0,0], 1, true);
+      addRing(1.28, 0.012, 0x91f1d5, [1.05,0.2,0.3], 0.7);
+      addRing(1.5, 0.006, 0x8ca7ff, [0.25,1.1,-0.4], -0.5);
+      [[1.45,0.18,0.2],[-1.18,0.55,-0.75],[0.2,-1.38,0.8]].forEach((p,i)=>{
+        const s=addMesh(new THREE.OctahedronGeometry(0.17,0),i===1?blue:silver,p);
+        s.userData.satellite=i+1; satellites.push(s);
+      });
+    } else if (mode === "torus") {
+      addMesh(new THREE.TorusKnotGeometry(0.73,0.22,180,18,2,3), mint, [0,0,0], 1, true);
+      addMesh(new THREE.OctahedronGeometry(0.31,1), blue);
+      addRing(1.38,0.009,0x91f1d5,[1.05,0.25,0.2],0.9);
+      addRing(1.62,0.005,0x8ca7ff,[0.2,1.15,-0.45],-0.6);
+      [[1.45,0.4,0],[-1.1,-0.7,0.7]].forEach((p,i)=>{const s=addMesh(new THREE.IcosahedronGeometry(0.13,1),i?blue:silver,p);s.userData.satellite=i+1;satellites.push(s);});
+    } else if (mode === "crystal") {
+      addMesh(new THREE.OctahedronGeometry(0.9,1), mint, [0,0,0], 1, true);
+      addMesh(new THREE.OctahedronGeometry(0.48,0), blue, [0.12,-0.04,0.05], 1, true);
+      [[1.1,0.2,0.2],[-1.05,0.5,-0.55],[0.25,-1.12,0.65],[0.1,0.8,-1.05]].forEach((p,i)=>{const s=addMesh(new THREE.OctahedronGeometry(0.22,0),i%2?blue:silver,p);s.userData.satellite=i+1;satellites.push(s);});
+      addRing(1.5,0.008,0x91f1d5,[1.0,0.2,0.35],0.65);
+      addRing(1.72,0.005,0x8ca7ff,[0.3,1.1,-0.4],-0.45);
+    } else {
+      addMesh(new THREE.TorusKnotGeometry(0.58,0.075,220,10,2,5), mint, [0,0,0], 1, true);
+      addRing(1.22,0.008,0x8ca7ff,[0.3,0.7,0.2],0.55);
+      for(let i=0;i<16;i++){
+        const t=i/16*Math.PI*2;
+        const y=(i/15-0.5)*1.9;
+        const s=addMesh(new THREE.SphereGeometry(0.075+(i%3)*0.018,12,10),i%3===0?blue:(i%3===1?mint:silver),[Math.cos(t)*0.86,y,Math.sin(t)*0.86]);
+        s.userData.satellite=i+1; satellites.push(s);
+      }
+    }
+    object.userData = { mode, wires, rings, satellites };
+    return object.userData;
+  }
+
+  function disposeSculpture(object) {
+    object.traverse(child => {
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach(material => material.dispose());
+      }
+    });
+    object.clear();
+  }
+
+  function setSculptureMode(mode) {
+    state.shapeMode = mode;
+    for (const view of renderers) buildSculpture(view.object, mode);
+    const labels = { polyhedron: "Polyhedral core", torus: "Torus knot", crystal: "Crystal cluster", helix: "Helix array" };
+    byId("scene-state").textContent = labels[mode] + " active";
   }
 
   function attachOrbitControls(view) {
@@ -185,6 +241,15 @@
     state.rotationY = 0;
     state.rotationZ = 0;
     state.speed = 1;
+    state.wireframe = false;
+    state.showGrid = true;
+    state.shapeMode = "polyhedron";
+    shapeInput.value = "polyhedron";
+    wireButton.setAttribute("aria-pressed", "false");
+    wireButton.textContent = "Wireframe";
+    gridButton.setAttribute("aria-pressed", "true");
+    gridButton.textContent = "Grid on";
+    renderers.forEach(view => { buildSculpture(view.object, state.shapeMode); view.floor.visible = true; });
     state.cameraYaw = 0;
     state.cameraPitch = 0;
     state.running = !reduceMotion;
@@ -208,8 +273,8 @@
     }
     for (const view of renderers) {
       view.object.rotation.set(state.rotationX, state.rotationY, state.rotationZ);
-      view.halo.rotation.z = 0.25 + state.rotationY * 0.14;
-      view.haloTwo.rotation.x = 0.24 + state.rotationX * 0.12;
+      view.object.userData.rings?.forEach(ring => { ring.rotation.z += 0.0018 * state.speed * (ring.userData.spin || 1) * delta; });
+      view.object.userData.satellites?.forEach((part, i) => { if (part.userData.satellite) { const t = time * 0.00035 * (i % 2 ? -1 : 1) + i; part.rotation.x += 0.0015 * delta; part.rotation.y += 0.002 * delta; } });
       view.stars.rotation.y = state.rotationY * 0.04;
       view.renderer.render(view.scene, view.camera);
     }
@@ -238,6 +303,19 @@
         updateMotionButton();
       });
       resetButton.addEventListener("click", resetScene);
+      shapeInput.addEventListener("change", () => setSculptureMode(shapeInput.value));
+      wireButton.addEventListener("click", () => {
+        state.wireframe = !state.wireframe;
+        renderers.forEach(view => view.object.userData.wires?.forEach(wire => { wire.visible = state.wireframe; }));
+        wireButton.setAttribute("aria-pressed", String(state.wireframe));
+        wireButton.textContent = state.wireframe ? "Wireframe on" : "Wireframe";
+      });
+      gridButton.addEventListener("click", () => {
+        state.showGrid = !state.showGrid;
+        renderers.forEach(view => { view.floor.visible = state.showGrid; });
+        gridButton.setAttribute("aria-pressed", String(state.showGrid));
+        gridButton.textContent = state.showGrid ? "Grid on" : "Grid off";
+      });
       window.addEventListener("keydown", event => {
         if (event.code === "Space" && !/INPUT|TEXTAREA|BUTTON/.test(document.activeElement?.tagName || "")) {
           event.preventDefault();
